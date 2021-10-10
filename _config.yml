@@ -3,17 +3,17 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: Hexo
-subtitle: ''
+title: 'qiuqiu的博客'
+subtitle: '阳光温热,岁月静好'
 description: ''
 keywords:
-author: John Doe
-language: en
+author: qiu_zs@126.com
+language: zh-CN
 timezone: ''
 
 # URL
 ## Set your site url here. For example, if you use GitHub Page, set url as 'https://username.github.io/project'
-url: http://example.com
+url: https://qiudev.cn
 permalink: :year/:month/:day/:title/
 permalink_defaults:
 pretty_urls:
@@ -97,9 +97,70 @@ ignore:
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: landscape
+theme: next
 
 # Deployment
 ## Docs: https://hexo.io/docs/one-command-deployment
 deploy:
-  type: ''
+  type: git
+  repo: git@github.com:qiuqiu0911/qiuqiu0911.github.io.git
+  branch: master
+
+search:
+  path: search.xml
+  field: post
+  format: html
+  limit: 10000
+
+theme_config:
+  scheme: Gemini
+  # Dark Mode
+  darkmode: true
+  menu:
+    home: / || fa fa-home
+    about: /about/ || fa fa-user
+    tags: /tags/ || fa fa-tags
+    # categories: /categories/ || fa fa-th
+    archives: /archives/ || fa fa-archive
+    # schedule: /schedule/ || fa fa-calendar
+    # sitemap: /sitemap.xml || fa fa-sitemap
+    # commonweal: /404/ || fa fa-heartbeat
+  social:
+    Github:  https://github.com/qiuqiu0911 || fab fa-github
+    Weibo: https://weibo.com/2301832825 || fab fa-weibo
+  social_icons:
+    enable: true
+    icons_only: true
+    transition: true
+  # Local search
+  # Dependencies: https://github.com/theme-next/hexo-generator-searchdb
+  local_search:
+    enable: true
+    # If auto, trigger search by changing input.
+    # If manual, trigger search by pressing enter key or search button.
+    trigger: auto
+    # Show top n results per article, show all results by setting to -1
+    top_n_per_article: 1
+    # Unescape html strings to the readable one.
+    unescape: false
+  # Sidebar Avatar
+  avatar:
+    # In theme directory (source/images): /images/avatar.gif
+    # In site directory (source/uploads): /uploads/avatar.gif
+    # You can also use other linking images.
+    url: /uploads/avatar.jpg
+    # If true, the avatar would be dispalyed in circle.
+    rounded: true
+    # If true, the avatar would be rotated with the cursor.
+    rotated: false
+  back2top:
+    enable: true
+    # Back to top in sidebar.
+    sidebar: false
+    # Scroll percent label in b2t button.
+    scrollpercent: true
+  # Automatically Excerpt (Not recommend).
+  # Use <!-- more --> in the post to control excerpt accurately.
+  auto_excerpt:
+    enable: false
+    length: 150
