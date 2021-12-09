@@ -164,3 +164,11 @@ theme_config:
   auto_excerpt:
     enable: false
     length: 150
+  busuanzi_count:
+    enable: true
+    total_visitors: true
+    total_visitors_icon: user
+    total_views: true
+    total_views_icon: eye
+    post_views: true
+    post_views_icon: eye
