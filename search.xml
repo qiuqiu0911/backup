@@ -1,0 +1,496 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>BeanUtils拷贝属性报错IllegalArgumentException</title>
+    <url>//2019/12/06/BeanUtils%E6%8B%B7%E8%B4%9D%E5%B1%9E%E6%80%A7%E6%8A%A5%E9%94%99IllegalArgumentException/</url>
+    <content><![CDATA[<p><code>org.springframework.beans.BeanUtils</code>提供了一个拷贝类属性的方法<code>copyProperties()</code>,在两个对象具有相同属性时，可以方便的将一个对象的属性值复制给另一个对象的对应属性。</p>
+<p>如 <code>Source</code>与<code>Target</code>均含有一个名为<code>id</code>的属性，通过<code>BeanUtils.copyProperties(source, target);</code>可以将source的id属性复制给target。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Source</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> Integer <span class="title function_">getId</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> id;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setId</span><span class="params">(Integer id)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.id = id;</span><br><span class="line">    &#125;</span><br><span class="line">    Integer id;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Target</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">getId</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> id;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setId</span><span class="params">(<span class="type">int</span> id)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.id = id;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">int</span> id;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">testCopyProperties</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">Source</span> <span class="variable">source</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Source</span>();</span><br><span class="line">    <span class="type">Target</span> <span class="variable">target</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Target</span>();</span><br><span class="line"><span class="comment">//  source.setId(123);</span></span><br><span class="line">    BeanUtils.copyProperties(source, target);</span><br><span class="line">    System.out.println(JSONObject.toJSON(target));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>但是，如果<code>source</code>的id属性为<code>null</code>, <code>BeanUtils.copyProperties(source, target);</code>方法会抛出异常<code>IllegalArgumentException</code></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">org.springframework.beans.FatalBeanException: Could not copy property <span class="string">&#x27;id&#x27;</span> from source to target; nested exception is java.lang.IllegalArgumentException</span><br><span class="line">	at org.springframework.beans.BeanUtils.copyProperties(BeanUtils.java:<span class="number">690</span>)</span><br><span class="line">    at org.springframework.beans.BeanUtils.copyProperties(BeanUtils.java:<span class="number">602</span>)</span><br></pre></td></tr></table></figure>
+<p>这个是目标的bean实体没有确定。如果javaBean中但属性含有基本类型，而model模型的对应的属性值为null，就会出现这个异常。<br><strong>解决办法</strong>： javaBean中的属性值不要使用基本类型。</p>
+<p>参考《阿里巴巴Java开发手册》</p>
+<blockquote>
+<ol start="8">
+<li>关于基本数据类型与包装数据类型的使用标准如下:</li>
+</ol>
+<p><strong>1) 【强制】所有的POJO类属性必须使用包装数据类型。</strong><br>2) 【强制】RPC方法的返回值和参数必须使用包装数据类型。<br>3) 【推荐】所有的局部变量使用基本数据类型。<br>说明:POJO 类属性没有初值是提醒使用者在需要使用时，必须自己显式地进行赋值，任何<br>NPE 问题，或者入库检查，都由使用者来保证。<br>正例:数据库的查询结果可能是 null，因为自动拆箱，用基本数据类型接收有 NPE 风险。 反例:比如显示成交总额涨跌情况，即正负 x%，x 为基本数据类型，调用的 RPC 服务，调用<br>不成功时，返回的是默认值，页面显示为 0%，这是不合理的，应该显示成中划线。所以包装 数据类型的 null 值，能够表示额外的信息，如:远程调用失败，异常退出。</p>
+</blockquote>
+]]></content>
+      <tags>
+        <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>CAS简析</title>
+    <url>//2019/07/14/CAS%E7%AE%80%E6%9E%90/</url>
+    <content><![CDATA[<ol>
+<li><h3 id="CAS结构体系"><a href="#CAS结构体系" class="headerlink" title="CAS结构体系"></a>CAS结构体系</h3>从结构体系看，CAS包括两部分：CAS Server和CAS Client。</li>
+</ol>
+<ul>
+<li>CAS Server负责完成对用户的认证工作, 需要独立部署, CAS Server 会处理用户名 / 密码等凭证 (Credentials)。</li>
+<li>负责处理对客户端受保护资源的访问请求，需要对请求方进行身份认证时，重定向到CAS Server进行认证。（原则上，客户端应用不再接受任何的用户名密码等 Credentials）。CAS Client 与受保护的客户端应用部署在一起，以 Filter 方式保护受保护的资源。<img src="/.cn//07/14/CAS%E7%AE%80%E6%9E%90/cas_architecture.png" class title="CAS结构体系"></li>
+</ul>
+<ol start="2">
+<li><h3 id="CAS凭证验证"><a href="#CAS凭证验证" class="headerlink" title="CAS凭证验证"></a>CAS凭证验证</h3><img src="/.cn//07/14/CAS%E7%AE%80%E6%9E%90/cas_clip_image001.jpg" class title="CAS凭证验证过程"></li>
+</ol>
+<p> CAS Client 与受保护的客户端应用部署在一起，以Filter方式保护Web应用的受保护资源，过滤从客户端过来的每一个Web请求，同时，CAS Client 会分析HTTP请求中是否包含请求Service Ticket( ST上图中的Ticket) ，如果没有，则说明该用户是没有经过认证的；于是CAS Client 会重定向用户请求到 CAS Server（Step 2），并传递Service（要访问的目的资源地址）。 Step 3是用户认证过程，如果用户提供了正确的Credentials， CAS Server随机产生一个相当长度、唯一、不可伪造的Service Ticket，并缓存以待将来验证，并且重定向用户到Service 所在地址（附带刚才产生的Service Ticket ）, 并为客户端浏览器设置一个Ticket Granted Cookie（TGC）；CAS Client 在拿到Service和新产生的 Ticket过后，在Step 5和Step6中与CAS Server进行身份核实，以确保 Service Ticket 的合法性。</p>
+<ol start="3">
+<li><h3 id="CAS术语"><a href="#CAS术语" class="headerlink" title="CAS术语"></a>CAS术语</h3>CAS系统中设计了5中票据：TGC、ST、PGT、PGTIOU、PT。</li>
+</ol>
+<ul>
+<li>Ticket-granting cookie(TGC)：存放用户身份认证凭证的cookie，在浏览器和CAS Server间通讯时使用，并且只能基于安全通道传输（Https），是CAS Server用来明确用户身份的凭证；</li>
+<li>Service ticket(ST)：服务票据，服务的惟一标识码,由CAS Server发出（Http传送），通过客户端浏览器到达业务服务器端；一个特定的服务只能有一个惟一的ST；</li>
+<li>Proxy-Granting ticket（PGT）：由CAS Server颁发给拥有ST凭证的服务，PGT绑定一个用户的特定服务，使其拥有向CAS Server申请，获得PT的能力；</li>
+<li>Proxy-Granting Ticket I Owe You（PGTIOU）:作用是将通过凭证校验时的应答信息由CAS Server 返回给CAS Client，同时，与该PGTIOU对应的PGT将通过回调链接传给Web应用。Web应用负责维护PGTIOU与PGT之间映射关系的内容表；</li>
+<li>Proxy Ticket (PT)：是应用程序代理用户身份对目标程序进行访问的凭证；</li>
+</ul>
+]]></content>
+      <tags>
+        <tag>Java</tag>
+        <tag>CAS</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Docker环境下部署MySQL</title>
+    <url>//2020/05/01/Docker%E7%8E%AF%E5%A2%83%E4%B8%8B%E9%83%A8%E7%BD%B2MySQL/</url>
+    <content><![CDATA[<ol>
+<li><h4 id="拉取镜像"><a href="#拉取镜像" class="headerlink" title="拉取镜像"></a>拉取镜像</h4><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">docker pull mysql:5.7.29</span><br></pre></td></tr></table></figure></li>
+<li><h4 id="创建本地目录"><a href="#创建本地目录" class="headerlink" title="创建本地目录"></a>创建本地目录</h4><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">mkdir -p ~/dev/mysql/&#123;log,data,conf&#125;</span><br></pre></td></tr></table></figure></li>
+<li><h4 id="创建容器，建立目录映射并启动"><a href="#创建容器，建立目录映射并启动" class="headerlink" title="创建容器，建立目录映射并启动"></a>创建容器，建立目录映射并启动</h4><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">docker run -d --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root \</span><br><span class="line">-v ~/dev/mysql/log:/var/log/mysql -v ~/dev/mysql/data:/var/lib/mysql \</span><br><span class="line">-v ~/dev/mysql/conf:/etc/mysql mysql:5.7.29</span><br></pre></td></tr></table></figure></li>
+</ol>
+]]></content>
+      <tags>
+        <tag>Docker</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Java泛型</title>
+    <url>//2019/07/22/Java%E6%B3%9B%E5%9E%8B/</url>
+    <content><![CDATA[<ol>
+<li><h3 id="泛型只在编译阶段有效"><a href="#泛型只在编译阶段有效" class="headerlink" title="泛型只在编译阶段有效"></a>泛型只在编译阶段有效</h3><p> 泛型只在编译阶段有效，是为了解决不确定具体对象类型的问题。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">List&lt;String&gt; stringArrayList = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;String&gt;();</span><br><span class="line">List&lt;Integer&gt; integerArrayList = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;Integer&gt;();</span><br><span class="line">System.out.println(stringArrayList.getClass().equals(integerArrayList.getClass()));</span><br><span class="line"></span><br><span class="line">Generic&lt;String&gt; stringGeneric = <span class="keyword">new</span> <span class="title class_">Generic</span>&lt;&gt;(<span class="string">&quot;test&quot;</span>);</span><br><span class="line">Generic&lt;Integer&gt; integerGeneric = <span class="keyword">new</span> <span class="title class_">Generic</span>&lt;&gt;(<span class="number">123</span>);</span><br><span class="line">System.out.println(stringGeneric.getClass().equals(integerGeneric.getClass()));</span><br></pre></td></tr></table></figure>
+<p> 输出为</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="literal">true</span></span><br><span class="line"><span class="literal">true</span></span><br></pre></td></tr></table></figure>
+<p> 说明Java中的泛型，只在编译阶段有效。在编译过程中，正确检验泛型结果后，会将泛型的相关信息擦除，并且在对象进入和离开方法的边界处添加类型检查和类型转换的方法。也就是说，泛型信息不会进入到运行时阶段。</p>
+<span id="more"></span></li>
+<li><h3 id="约定俗成的符号"><a href="#约定俗成的符号" class="headerlink" title="约定俗成的符号"></a>约定俗成的符号</h3><ul>
+<li><code>E</code>代表<code>Element</code>，用于集合中的元素</li>
+<li><code>T</code>代表 <code>the Type of object</code>，表示某个类</li>
+<li><code>K</code>代表<code>Key</code>，<code>V</code>代表<code>Value</code>，用于键值对元素。</li>
+<li><code>?</code>表示不确定类型</li>
+</ul>
+</li>
+<li><h3 id="泛型类"><a href="#泛型类" class="headerlink" title="泛型类"></a>泛型类</h3><blockquote>
+<p>泛型类型用于类的定义中，被称为泛型类。通过泛型可以完成对一组类的操作对外开放相同的接口。最典型的就是各种容器类，如：List、Set、Map。</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">class 类名称 &lt;泛型标识：可以随便写任意标识号，标识指定的泛型的类型&gt;&#123;</span><br><span class="line">  <span class="keyword">private</span> 泛型标识 <span class="comment">/*（成员变量类型）*/</span> <span class="keyword">var</span>; </span><br><span class="line">  .....</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> 一个简单的泛型类</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Generic</span>&lt;T&gt; &#123;</span><br><span class="line">    <span class="keyword">private</span> T key;</span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">Generic</span><span class="params">(T key)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.key = key;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> T <span class="title function_">getKey</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> key;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> 对比非泛型类,使用<code>Object</code>作为参数类型</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">NoGeneric</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> Object key;</span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">NoGeneric</span><span class="params">(Object key)</span>&#123;</span><br><span class="line">        <span class="built_in">this</span>.key = key;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> Object <span class="title function_">getKey</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> key;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> 泛型类的应用避免了强制转换的风险，提升了安全性和代码的可读性。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Generic&lt;String&gt; stringGeneric = <span class="keyword">new</span> <span class="title class_">Generic</span>&lt;&gt;(<span class="string">&quot;test&quot;</span>);</span><br><span class="line">Generic&lt;Integer&gt; integerGeneric = <span class="keyword">new</span> <span class="title class_">Generic</span>&lt;&gt;(<span class="number">123</span>);</span><br><span class="line"><span class="comment">// 不需要进行强制类型转换</span></span><br><span class="line"><span class="type">String</span> <span class="variable">key</span> <span class="operator">=</span> stringGeneric.getKey();</span><br><span class="line"><span class="type">Integer</span> <span class="variable">key1</span> <span class="operator">=</span> integerGeneric.getKey();</span><br><span class="line"></span><br><span class="line"><span class="type">NoGeneric</span> <span class="variable">stringNoGeneric</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">NoGeneric</span>(<span class="string">&quot;test&quot;</span>);</span><br><span class="line"><span class="type">NoGeneric</span> <span class="variable">integerNoGeneric</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">NoGeneric</span>(<span class="number">123</span>);</span><br><span class="line"><span class="type">String</span> <span class="variable">key2</span> <span class="operator">=</span> (String) stringNoGeneric.getKey();</span><br><span class="line"><span class="type">Integer</span> <span class="variable">key3</span> <span class="operator">=</span> (Integer) integerNoGeneric.getKey();</span><br></pre></td></tr></table></figure></li>
+<li><h3 id="泛型方法"><a href="#泛型方法" class="headerlink" title="泛型方法"></a>泛型方法</h3><p>定义方法：<br><code>修饰符&lt;泛型标识&gt;返回类型 方法名(泛型标识 参数名)&#123;    &#125; </code><br>如</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> &lt;T&gt; <span class="keyword">void</span> <span class="title function_">test</span><span class="params">(T param)</span>&#123;</span><br><span class="line">    System.out.println(param.toString());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> 反例: 这不是一个泛型方法，这是一个普通的方法，只不过使用了泛型通配符?</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">test</span><span class="params">(Generic&lt;?&gt; obj)</span>&#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;泛型测试 key value is &quot;</span> + obj.getKey());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><h3 id="泛型通配符"><a href="#泛型通配符" class="headerlink" title="泛型通配符"></a>泛型通配符</h3><p><code>&lt;? extends T&gt;</code> 的场景是put功能受限, <code>&lt;? super T&gt;</code>的场景是get功能受限</p>
+</li>
+</ol>
+]]></content>
+      <tags>
+        <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Java参数传递</title>
+    <url>//2019/09/14/Java%E5%8F%82%E6%95%B0%E4%BC%A0%E9%80%92/</url>
+    <content><![CDATA[<p>无论是对于基本数据类型，还是引用变量，Java中的参数传递都是<strong>值复制</strong>的传递过程。对于引用变量,复制指向<strong>对象的首地址</strong>,双方都可以通过自己的引用变量修改指向对象的相关属性。<br>而<code>String</code>是<code>immutable</code>对象,即不可变类。每次修改<code>String</code>对象的值，其实都是创建了一个新的<code>String</code>对象,再赋值为修改后的值。这也就是<code>String</code>对象和其他引用类型表现不同的原因。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> qiuqiu</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Demo</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="type">int</span> <span class="variable">intStatic</span> <span class="operator">=</span> <span class="number">222</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="type">String</span> <span class="variable">stringStatic</span> <span class="operator">=</span> <span class="string">&quot;old string&quot;</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="type">StringBuilder</span> <span class="variable">stringBuilderStatic</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">StringBuilder</span>(<span class="string">&quot;old stringBuilder&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">method</span><span class="params">(<span class="type">int</span> intStatic)</span>&#123;</span><br><span class="line">        intStatic = <span class="number">777</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span>  <span class="title function_">method</span><span class="params">()</span>&#123;</span><br><span class="line">        intStatic = <span class="number">888</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">method</span><span class="params">(String stringStatic)</span>&#123;</span><br><span class="line">        stringStatic = <span class="string">&quot;new string&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">method</span><span class="params">(StringBuilder stringBuilderStatic1, StringBuilder stringBuilderStatic2)</span>&#123;</span><br><span class="line">        stringBuilderStatic1.append(<span class="string">&quot;.method.first-&quot;</span>);</span><br><span class="line">        stringBuilderStatic2.append(<span class="string">&quot;method.second-&quot;</span>);</span><br><span class="line"></span><br><span class="line">        stringBuilderStatic1 = <span class="keyword">new</span> <span class="title class_">StringBuilder</span>(<span class="string">&quot;new stringBuilder&quot;</span>);</span><br><span class="line">        stringBuilderStatic1.append(<span class="string">&quot;new method&#x27;s append&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        method(intStatic);</span><br><span class="line">        method(stringStatic);</span><br><span class="line">        method(stringBuilderStatic,stringBuilderStatic);</span><br><span class="line"></span><br><span class="line">        System.out.println(intStatic);</span><br><span class="line">        method();</span><br><span class="line">        System.out.println(intStatic);</span><br><span class="line"></span><br><span class="line">        System.out.println(stringStatic);</span><br><span class="line">        System.out.println(stringBuilderStatic);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>程序输出为:</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="number">222</span></span><br><span class="line"><span class="number">888</span></span><br><span class="line">old string</span><br><span class="line">old stringBuilder.method.first-method.second-</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>《码出高效 Java开发手册》</p>
+</blockquote>
+]]></content>
+      <tags>
+        <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>MyBatis参数绑定</title>
+    <url>//2019/07/15/MyBatis%E5%8F%82%E6%95%B0%E7%BB%91%E5%AE%9A/</url>
+    <content><![CDATA[<p>合理使用数据库访问框架提供的防注入机制，可以有效防止SQL注入。<br>如Mybatis提供的<code>#&#123;&#125;</code>绑定参数，从而防止SQL注入。<br><code>$&#123;&#125;</code>相当于使用字符串拼接SQL</p>
+<blockquote>
+<p>  mybatis中的#和$的区别：<br>    1、#将传入的数据都当成一个字符串，会对自动传入的数据加一个双引号。<br>    如：where username=#{username}，如果传入的值是111,那么解析成sql时的值为where username=”111”, 如果传入的值是id，则解析成的sql为where username=”id”.　<br>    2、$将传入的数据直接显示生成在sql中。<br>    如：where username=${username}，如果传入的值是111,那么解析成sql时的值为where username=111；<br>    如果传入的值是;drop table user;，则解析成的sql为：select id, username, password, role from user where username=;drop table user;<br>    3、#方式能够很大程度防止sql注入，$方式无法防止Sql注入。<br>    4、$方式一般用于传入数据库对象，例如传入表名.<br>    5、一般能用#的就别用$，若不得不使用“${xxx}”这样的参数，要手工地做好过滤工作，来防止sql注入攻击。<br>    6、在MyBatis中，“${xxx}”这样格式的参数会直接参与SQL编译，从而不能避免注入攻击。但涉及到动态表名和列名时，只能使用“${xxx}”这样的参数格式。所以，这样的参数需要我们在代码中手工进行处理来防止注入。<br>    【结论】在编写MyBatis的映射语句时，尽量采用“#{xxx}”这样的格式。若不得不使用“${xxx}”这样的参数，要手工地做好过滤工作，来防止SQL注入攻击。<br><code>https://www.cnblogs.com/mmzs/p/8398405.html</code></p>
+</blockquote>
+]]></content>
+      <tags>
+        <tag>Java</tag>
+        <tag>MyBatis</tag>
+        <tag>编程规范</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>MySQL主从复制配置</title>
+    <url>//2020/08/04/MySQL%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E9%85%8D%E7%BD%AE/</url>
+    <content><![CDATA[<ol>
+<li><h4 id="业务场景"><a href="#业务场景" class="headerlink" title="业务场景"></a>业务场景</h4><p>多地公用一套数据，但网络有时不通；数据在中心节点统一维护，其他子节点仅进行查询。<br>采用MySQL主从同步方案，在网络链接正常时将主库的数据同步到从库。子节点只读取本地的数据库。</p>
+</li>
+<li><h4 id="主库配置"><a href="#主库配置" class="headerlink" title="主库配置"></a>主库配置</h4><ol>
+<li>修改my.cnf 开启二进制日志，并设置server-id<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">vim /etc/my.cnf</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[mysqld]</span><br><span class="line">log-bin=mysql-bin #开启二进制日志</span><br><span class="line">server-id=1 #设置server-id，必须唯一</span><br><span class="line"># 不同步哪些数据库  </span><br><span class="line">binlog-ignore-db=mysql  </span><br><span class="line">binlog-ignore-db=information_schema</span><br><span class="line">binlog-ignore-db=performance_shcema</span><br><span class="line">binlog-ignore-db=sys</span><br></pre></td></tr></table></figure></li>
+<li>重启mysql，连接mysql查看master的状态，并记录二进制文件名(例：mysql-bin.000003)和位置(例：73)<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># mysql -h localhost -u name -p password</span><br><span class="line">mysql &gt; SHOW MASTER STATUS;</span><br><span class="line">+------------------+----------+--------------+------------------+</span><br><span class="line">| File             | Position | Binlog_Do_DB | Binlog_Ignore_DB |</span><br><span class="line">+------------------+----------+--------------+------------------+</span><br><span class="line">| mysql-bin.000003 | 73       | test         | manual, mysql     |</span><br><span class="line">+------------------+----------+--------------+------------------+</span><br></pre></td></tr></table></figure></li>
+</ol>
+</li>
+<li><h4 id="从库配置"><a href="#从库配置" class="headerlink" title="从库配置"></a>从库配置</h4><ol>
+<li><p>修改/etc/my.cnf,设置server-id</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[mysqld]</span><br><span class="line">server-id=2 #设置server-id，必须唯一</span><br></pre></td></tr></table></figure></li>
+<li><p>重启mysql，打开mysql会话，执行同步SQL语句(需要主服务器主机名，登陆凭据，二进制文件的名称和位置)</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">mysql&gt; CHANGE MASTER TO</span><br><span class="line">-&gt;     MASTER_HOST=&#x27;主库ip&#x27;,</span><br><span class="line">-&gt;     MASTER_USER=&#x27;主库用户名&#x27;,</span><br><span class="line">-&gt;     MASTER_PASSWORD=&#x27;主库密码&#x27;,</span><br><span class="line">-&gt;     MASTER_LOG_FILE=&#x27;mysql-bin.000003&#x27;,</span><br><span class="line">-&gt;     MASTER_LOG_POS=73;</span><br></pre></td></tr></table></figure></li>
+<li><p>启动slave同步进程</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">mysql&gt; start slave;</span><br></pre></td></tr></table></figure></li>
+<li><p>查看slave同步状态</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"> show slave status\G;</span><br><span class="line">*************************** 1. row ***************************</span><br><span class="line">           Slave_IO_State: Waiting for master to send event</span><br><span class="line">              Master_Host: mysql-master</span><br><span class="line">              Master_User: root</span><br><span class="line">              Master_Port: 3306</span><br><span class="line">            Connect_Retry: 60</span><br><span class="line">          Master_Log_File: mysql-bin.000013</span><br><span class="line">      Read_Master_Log_Pos: 11662</span><br><span class="line">           Relay_Log_File: mysqld-relay-bin.000022</span><br><span class="line">            Relay_Log_Pos: 11765</span><br><span class="line">    Relay_Master_Log_File: mysql-bin.000013</span><br><span class="line">         Slave_IO_Running: Yes</span><br><span class="line">        Slave_SQL_Running: Yes</span><br><span class="line">          Replicate_Do_DB: </span><br><span class="line">      Replicate_Ignore_DB: </span><br></pre></td></tr></table></figure>
+<p>当<code>Slave_IO_Running</code>和<code>Slave_SQL_Running</code>都为YES的时候就表示主从同步设置成功了。</p>
+</li>
+</ol>
+</li>
+<li><h4 id="验证配置"><a href="#验证配置" class="headerlink" title="验证配置"></a>验证配置</h4></li>
+</ol>
+<p>  在主master数据库的一张表中插入一条数据，在slave的相同数据表中查看是否有新增的数据即可验证主从复制功能是否有效。<br>  还可以关闭slave（mysql&gt;stop slave;）,然后再修改master，看slave是否也相应修改（停止slave后，master的修改不会同步到slave），就可以完成主从复制功能的验证了。</p>
+]]></content>
+      <tags>
+        <tag>运维</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>PMP学习笔记</title>
+    <url>//2019/07/15/PMP%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</url>
+    <content><![CDATA[<h2 id="第四章-项目整合管理"><a href="#第四章-项目整合管理" class="headerlink" title="第四章 项目整合管理"></a>第四章 项目整合管理</h2><ol>
+<li><h3 id="什么是整合管理，整合什么，如何整合？整合管理的发展趋势是什么？"><a href="#什么是整合管理，整合什么，如何整合？整合管理的发展趋势是什么？" class="headerlink" title="什么是整合管理，整合什么，如何整合？整合管理的发展趋势是什么？"></a>什么是整合管理，整合什么，如何整合？整合管理的发展趋势是什么？</h3>项目整合管理包括对隶属于项目管理过程组的各种过程和项目管理活动进行识别、定义、组合、统一和协调的各个过程。<br> <strong>项目整合管理指的是：</strong><ul>
+<li>确保产品、服务或成果的交付日期，项目生命周期以及效益管理计划这些方面保持一致</li>
+<li>编织项目管理计划以实现项目目标</li>
+<li>确保创造合适的知识并运用到项目中，并从项目中获取必要的知识</li>
+<li>管理项目管理计划中活动的绩效和变更</li>
+<li>作出针对影响项目的关键变更的综合决策</li>
+<li>测量和监督项目进展，并采取适当的措施以实现项目目标</li>
+<li>收集关于以实现的成果的数据，分析数据以获取信息，并与相关方分享信息</li>
+<li>完成全部项目工作。正式关闭各个阶段、合同以及整个项目</li>
+<li>管理可能需要的阶段过渡</li>
+</ul>
+ <strong>项目整合管理的发展趋势包括但不限于：</strong><ul>
+<li>使用自动化工具</li>
+<li>使用可视化管理工具</li>
+<li>项目知识管理</li>
+<li>增加项目经理的职责</li>
+<li>混合型方法<span id="more"></span></li>
+</ul>
+</li>
+<li><h3 id="项目章程是干什么的，它的作用是什么，主要内容是什么？"><a href="#项目章程是干什么的，它的作用是什么，主要内容是什么？" class="headerlink" title="项目章程是干什么的，它的作用是什么，主要内容是什么？"></a>项目章程是干什么的，它的作用是什么，主要内容是什么？</h3>制定项目章程是编写一份<strong>正式批准项目</strong>并<strong>授权项目经理</strong>在项目活动中使用<strong>组织资源</strong>的文件的过程。<br>本过程的主要作用是，明确项目与组织战略目标之间的直接联系，确立项目的正式地位，并展示组织对项目的承诺。本过程仅开展一次或尽在项目的预定义点开展。<br>项目章程在 项目执行组织与 需求组织之间建立起伙伴关系。在执行外部项目时，通常效益用正式的合同来达成合作协议。这种情况下，可能仍要用项目章程来建立 组织内部的合作关系，以确保正确交付合同内容。<br>项目章程授权项目经理规划 、执行和控制项目。<br>项目由项目以外的机构来启动，如发起人、项目集或项目管理办公室（PMO）、项目组合治理委员会主席或其授权代表。</li>
+<li><h3 id="为什么要进行商业论证？商业论证编织的触发因素有哪些？"><a href="#为什么要进行商业论证？商业论证编织的触发因素有哪些？" class="headerlink" title="为什么要进行商业论证？商业论证编织的触发因素有哪些？"></a>为什么要进行商业论证？商业论证编织的触发因素有哪些？</h3>经批准的商业论证或类似文件是 最长用于制定项目长成的商业文件。商业论证从商业视角描述必要的信息，并且据此决定项目的期望结果是否值得所需投资。高于项目级别的精力和 高管们通常使用改 文件作为决策的依据。一般情况下，商业论证会包含<strong>商业需求和成本效益分析</strong>，以<strong>论证项目的合理性并确定项目边界</strong>。<br>商业论证的编织可由以下一个或多个因素引发：<ul>
+<li>市场需求</li>
+<li>组织需要</li>
+<li>客户要求</li>
+<li>技术进步 </li>
+<li>法律要求 </li>
+<li>生态影响</li>
+<li>社会需要</li>
+</ul>
+</li>
+<li><h3 id="项目管理计划是什么样的计划？项目管理计划包括哪几种？计划是由谁来制定的？为什么项目管理计划的输入中要有其他过程的输出？项目管理计划和项目文件有什么区别？"><a href="#项目管理计划是什么样的计划？项目管理计划包括哪几种？计划是由谁来制定的？为什么项目管理计划的输入中要有其他过程的输出？项目管理计划和项目文件有什么区别？" class="headerlink" title="项目管理计划是什么样的计划？项目管理计划包括哪几种？计划是由谁来制定的？为什么项目管理计划的输入中要有其他过程的输出？项目管理计划和项目文件有什么区别？"></a>项目管理计划是什么样的计划？项目管理计划包括哪几种？计划是由谁来制定的？为什么项目管理计划的输入中要有其他过程的输出？项目管理计划和项目文件有什么区别？</h3>制定项目管理计划是定义、准备和协调项目计划的所有组成部分，并把它们整合为一份综合项目管理计划的过程。项目管理计划确定项目的执行、监控和收尾方式，其内容会因项目所在的应用领域和复杂程度而异。<br>创建项目管理计划需要整合诸多过程的输出。其他规划过程所输出的 自己花和基准都是本过程的输入。此外，对这些自计划和基准的变更都可能导致对项目管理计划的相应更新。<br>项目管理计划组件包括：子计划管理、基准、其他组件。项目管理计划是用于管理项目的主要文件之一。管理项目时还会使用其他项目文件。这些其他文件不属于项目管理计划，但它们也是实现高效管理所必须的文件。</li>
+<li><h3 id="指导与管理项目执行的主要活动是什么？主要任务是什么？为什么在执行过程中有变更的产生？这个过程的主要成果是什么？工作绩效数据是怎么产生的，包括什么内容？变更包括哪4种，怎么进行区别？什么是问题日志，包括什么内容？"><a href="#指导与管理项目执行的主要活动是什么？主要任务是什么？为什么在执行过程中有变更的产生？这个过程的主要成果是什么？工作绩效数据是怎么产生的，包括什么内容？变更包括哪4种，怎么进行区别？什么是问题日志，包括什么内容？" class="headerlink" title="指导与管理项目执行的主要活动是什么？主要任务是什么？为什么在执行过程中有变更的产生？这个过程的主要成果是什么？工作绩效数据是怎么产生的，包括什么内容？变更包括哪4种，怎么进行区别？什么是问题日志，包括什么内容？"></a>指导与管理项目执行的主要活动是什么？主要任务是什么？为什么在执行过程中有变更的产生？这个过程的主要成果是什么？工作绩效数据是怎么产生的，包括什么内容？变更包括哪4种，怎么进行区别？什么是问题日志，包括什么内容？</h3>指导与管理项目工作是为实现项目目标而领导和执行项目管理计划中所确定的工作，并实现已批准变更的过程。本过程的主要作用是，对项目工作和可交付成果开展综合管理，以提高项目成功的可能性。<br>可作为本过程输入的项目文件包括：变更日志、经验教训登记册、里程碑清单、项目沟通记录、项目进度计划、需求跟踪矩阵、风险登记册、风险报告。<br>指导与管理项目工作的输出主要为：<strong>可交付成果、工作绩效数据、问题日志、变更请求、项目管理计划更新、组织过程资产更新。</strong><br>工作绩效数据是在执行项目工作的过程中，从每个正在执行的活动中收集到的原始观察结果和测量值。数据通常是最低层次的细节，将交由其他过程从中提炼出信息。在工作执行过程中收集数据，再交由控制过程做进一步分析。例如：工作绩效数据包括已完成的工作、关键绩效指标（KPI）、技术绩效册类结果、进度活动的世纪开始时间和完成日期、已完成的故事点、可交付成果状态、进度进展情况、变更请求的数量、缺陷的数量、实际发生的成本、实际持续时间等。<br>变更请求可能包括：<strong>纠正措施、预防措施、缺陷补救、更新。</strong><br>问题日志是一种记录和跟进所有问题的项目文件，所需记录和跟进的内容可能包括：<strong>问题类型、问题提出者和提出时间、问题描述、问题优先级、由谁负责解决问题、目标解决日期、问题状态、最终解决情况</strong></li>
+</ol>
+<h2 id="第九章-项目资源管理"><a href="#第九章-项目资源管理" class="headerlink" title="第九章 项目资源管理"></a>第九章 项目资源管理</h2><ol>
+<li><h3 id="什么是自组织团队，什么是虚拟团队-分布式团队？"><a href="#什么是自组织团队，什么是虚拟团队-分布式团队？" class="headerlink" title="什么是自组织团队，什么是虚拟团队/分布式团队？"></a>什么是自组织团队，什么是虚拟团队/分布式团队？</h3></li>
+</ol>
+<ul>
+<li>自组织团队。随着敏捷方法在 IT 项目中的应用越来越普遍，自组织团队(无需集中管控运作) 越来越多。对于拥有自组织团队的项目，“项目经理”(可能不称为“项目经理”)的角色主要是为团队创造环境、提供支持并信任团队可以完成工作。成功的自组织团队通常由通用的专才而不是主题专家组成，他们能够不断适应变化的环境并采纳建设性反馈。</li>
+<li>虚拟团队/分布式团队。项目全球化推动了对虚拟团队的需求的增长。这些团队成员致力于同一个项目，却分布在不同的地方。沟通技术(如电子邮件、电话会议、社交媒体、网络会议 和视频会议等)的使用，使虚拟团队变得可行。虚拟团队管理有独特的优势，例如能够利用项目团队的专业技术，即使相应的专家不在同一地理区域;将在家办公的员工纳入团队;以及将行动不便者或残疾人纳入团队。而虚拟团队管理面临的挑战主要在于沟通，包括可能产生孤立感、团队成员之间难以分享知识和经验、难以跟进进度和生产率，以及可能存在时区和文化差异。</li>
+</ul>
+<ol start="2">
+<li><h3 id="为什么要制定资源管理计划？从哪里获得对资源对需求？使用什么工具来进行组织机构与职位描述？RAM与RACI有没有区别？"><a href="#为什么要制定资源管理计划？从哪里获得对资源对需求？使用什么工具来进行组织机构与职位描述？RAM与RACI有没有区别？" class="headerlink" title="为什么要制定资源管理计划？从哪里获得对资源对需求？使用什么工具来进行组织机构与职位描述？RAM与RACI有没有区别？"></a>为什么要制定资源管理计划？从哪里获得对资源对需求？使用什么工具来进行组织机构与职位描述？RAM与RACI有没有区别？</h3></li>
+</ol>
+<ul>
+<li> 资源规划用于确定和识别一种方法，以确保项目的成功完成有足够的可用资源。项目资源可能 包括团队成员、用品、材料、设备、服务和设施。有效的资源规划需要考虑稀缺资源的可用性和竞争，并编制相应的计划。</li>
+<li>这些资源可以从组织内部资产获得，或者通过采购过程从组织外部获取。其他项目可能在同一时间和地点竞争项目所需的相同资源，从而可能对项目成本、进度、风险、质量和其他项目领域造成显著影响。</li>
+</ul>
+]]></content>
+      <tags>
+        <tag>PMP</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>ResponseBodyAdvice对response数据统一封装</title>
+    <url>//2021/11/23/ResponseBodyAdvice%E5%AF%B9response%E6%95%B0%E6%8D%AE%E7%BB%9F%E4%B8%80%E5%B0%81%E8%A3%85/</url>
+    <content><![CDATA[<h2 id="使用背景"><a href="#使用背景" class="headerlink" title="使用背景"></a>使用背景</h2><p>SpringBoot开发web应用时，只返回请求结果往往是不够的，需要补充返回消息、封装响应代码等，我们会封装成类似如下代码的结构。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Getter</span></span><br><span class="line"><span class="meta">@Setter</span></span><br><span class="line"><span class="meta">@ToString</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ResultDTO</span>&lt;T&gt; &#123;</span><br><span class="line">    <span class="keyword">private</span> String message;</span><br><span class="line">    <span class="keyword">private</span> Integer code;</span><br><span class="line">    <span class="keyword">private</span> T data;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>用于返回下面这种数据:</p>
+<figure class="highlight json"><table><tr><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;message&quot;</span><span class="punctuation">:</span> <span class="string">&quot;获取成功&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;code&quot;</span><span class="punctuation">:</span> <span class="number">200</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;data&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">        <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;id&quot;</span><span class="punctuation">:</span> <span class="string">&quot;d47ebc6e-5d30-4c16-9707-57fd6e1fa0f2&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;test&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;age&quot;</span><span class="punctuation">:</span> <span class="number">18</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;address&quot;</span><span class="punctuation">:</span> <span class="string">&quot;测试地址&quot;</span></span><br><span class="line">        <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>但是如果应用对外提供feign的调用形式，如果依旧采用这种形式，客户端就需要解析ResultDTO，再从中获取data数据。<br>当然我们可以单独再写一个直接返回data的rest接口，但这样有点low。</p>
+<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><p>增加逻辑，对supports中的判断做区分, 如果是feign调用，不执行beforeBodyWrite。例如：在feign调用中增加特殊的请求头，检测到该头返回false</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// basePackages可以设置ResponseBodyAdvice的生效范围</span></span><br><span class="line"><span class="meta">@RestControllerAdvice(basePackages = &quot;cn.qiudev.demo&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ResponseAdvice</span> <span class="keyword">implements</span> <span class="title class_">ResponseBodyAdvice</span>&lt;Object&gt; &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">supports</span><span class="params">(MethodParameter returnType, Class&lt;? extends HttpMessageConverter&lt;?&gt;&gt; converterType)</span> &#123;</span><br><span class="line">        <span class="comment">//todo 通过MethodParameter其中的参数确定是否为feign调用,feign调用直接返回原结构</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Object <span class="title function_">beforeBodyWrite</span><span class="params">(Object body, MethodParameter returnType, MediaType selectedContentType, Class&lt;? extends HttpMessageConverter&lt;?&gt;&gt; selectedConverterType, ServerHttpRequest request, ServerHttpResponse response)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (body <span class="keyword">instanceof</span> ResultDTO) &#123;</span><br><span class="line">            <span class="keyword">return</span> body;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            ResultDTO&lt;Object&gt; resultDTO = <span class="keyword">new</span> <span class="title class_">ResultDTO</span>&lt;&gt;();</span><br><span class="line">            resultDTO.setData(body);</span><br><span class="line">            resultDTO.setMessage(<span class="string">&quot;获取成功&quot;</span>);</span><br><span class="line">            resultDTO.setCode(<span class="number">200</span>);</span><br><span class="line">            <span class="keyword">return</span> resultDTO;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样restController中就不用再返回我们统一封装的ResultDTO了。</p>
+]]></content>
+      <tags>
+        <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>SpringBoot web应用中自定义的controller找不到</title>
+    <url>//2020/02/01/SpringBoot-web%E5%BA%94%E7%94%A8%E4%B8%AD%E8%87%AA%E5%AE%9A%E4%B9%89%E7%9A%84controller%E6%89%BE%E4%B8%8D%E5%88%B0/</url>
+    <content><![CDATA[<p>问题：自定义的<code>controller</code>增加<code>@RestController</code>注解后访问 仍返回404</p>
+<img src="/.cn//02/01/SpringBoot-web%E5%BA%94%E7%94%A8%E4%B8%AD%E8%87%AA%E5%AE%9A%E4%B9%89%E7%9A%84controller%E6%89%BE%E4%B8%8D%E5%88%B0/%E9%97%AE%E9%A2%98.png" class title="问题">
+<p>原因：springboot 推荐<code>启动类</code>与<code>controller包</code>在同一层级，默认也是按这个扫描的<br>解决方案：</p>
+<ol>
+<li>可以放在同一层级，如下图<img src="/.cn//02/01/SpringBoot-web%E5%BA%94%E7%94%A8%E4%B8%AD%E8%87%AA%E5%AE%9A%E4%B9%89%E7%9A%84controller%E6%89%BE%E4%B8%8D%E5%88%B0/%E5%90%8C%E5%B1%82%E7%BA%A7.png" class title="同层级"></li>
+<li>也可以通过增加<code>@ComponentScan</code>注解解决<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="meta">@ComponentScan(basePackages = &quot;dev.qiuqiu.controller&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">DemoApplication</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        SpringApplication.run(DemoApplication.class, args);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ol>
+]]></content>
+      <tags>
+        <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>brew下载加速</title>
+    <url>//2020/01/06/brew%E4%B8%8B%E8%BD%BD%E5%8A%A0%E9%80%9F/</url>
+    <content><![CDATA[<p><strong>Homebrew</strong>是一款Mac OS平台下的软件包管理工具，拥有安装、卸载、更新、查看、搜索等很多实用的功能。简单的一条指令，就可以实现包管理，而不用你关心各种依赖和文件路径的情况，十分方便快捷。使用<code>brew</code>安装软件时, 可以将brew的仓库访问地址改成<code>alibaba</code>的地址来加速</p>
+<ol>
+<li><h4 id="将brew访问的仓库地址改成aliyun镜像"><a href="#将brew访问的仓库地址改成aliyun镜像" class="headerlink" title="将brew访问的仓库地址改成aliyun镜像"></a>将brew访问的仓库地址改成aliyun镜像</h4></li>
+</ol>
+<ul>
+<li>替换brew.git 仓库地址<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">cd &quot;$(brew --repo)&quot; </span><br><span class="line">git remote set-url origin https://mirrors.aliyun.com/homebrew/brew.git </span><br></pre></td></tr></table></figure></li>
+<li>替换homebrew-core.git仓库地址<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">cd &quot;$(brew --repo)/Library/Taps/homebrew/homebrew-core&quot; </span><br><span class="line">git remote set-url origin https://mirrors.aliyun.com/homebrew/homebrew-core.git </span><br></pre></td></tr></table></figure></li>
+<li>替换homebrew-bottles访问地址<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">echo &#x27;export HOMEBREW_BOTTLE_DOMAIN=https://mirrors.aliyun.com/homebrew/homebrew-bottles&#x27; &gt;&gt; ~/.zshrc</span><br></pre></td></tr></table></figure></li>
+</ul>
+<ol start="2">
+<li><h4 id="如需换回原来官方的地址，同样修改以上三处"><a href="#如需换回原来官方的地址，同样修改以上三处" class="headerlink" title="如需换回原来官方的地址，同样修改以上三处"></a>如需换回原来官方的地址，同样修改以上三处</h4></li>
+</ol>
+<ul>
+<li>替换brew.git 仓库地址<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">cd &quot;$(brew --repo)&quot; </span><br><span class="line">git remote set-url origin https://github.com/Homebrew/brew.git</span><br></pre></td></tr></table></figure></li>
+<li>替换homebrew-core.git仓库地址<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">cd &quot;$(brew --repo)/Library/Taps/homebrew/homebrew-core&quot;</span><br><span class="line">git remote set-url origin https://github.com/Homebrew/homebrew-core.git</span><br></pre></td></tr></table></figure></li>
+<li>替换homebrew-bottles访问地址<br><code>vi ~/.zshrc</code> 删除<code>HOMEBREW_BOTTLE_DOMAIN</code>所在的行</li>
+</ul>
+]]></content>
+      <tags>
+        <tag>macOS</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>elasticsearch防止脑裂的配置</title>
+    <url>//2019/08/02/elasticsearch%E9%98%B2%E6%AD%A2%E8%84%91%E8%A3%82%E7%9A%84%E9%85%8D%E7%BD%AE/</url>
+    <content><![CDATA[<ol>
+<li><h3 id="什么是脑裂"><a href="#什么是脑裂" class="headerlink" title="什么是脑裂"></a>什么是脑裂</h3>Elasticsearch不仅仅是 Lucene，并且也不仅仅只是一个全文搜索引擎。它可以被下面这样准确的形容：</li>
+</ol>
+<ul>
+<li>一个分布式的实时文档存储，每个字段 可以被索引与搜索</li>
+<li>一个分布式实时分析搜索引擎</li>
+<li>能胜任上百个服务节点的扩展，并支持 PB 级别的结构化或者非结构化数据。</li>
+</ul>
+<p> 正常情况下，es集群中只有一个主节点，主节点负责管理整个集群，集群的所有节点都会选择同一个节点作为主节点所以无论访问那个节点都可以查看集群的状态信息。而<code>脑裂</code>就是指集群中从节点在选择主节点时出现了分歧，导致集群中出现了多个主节点。这样的脑裂状态直接让节点失去了集群的正确状态，导致集群不能正常工作，也会产生数据不一致的情况。<br>2. ### 脑裂产生的可能原因</p>
+<ul>
+<li>网络问题：集群间的网络延迟导致一些节点访问不到master，认为master挂掉了从而选举出新的master，并对master上的分片和副本标红，分配新的主分片</li>
+<li>节点负载：主节点的角色既为master又为data，访问量较大时可能会导致ES停止响应造成大面积延迟，此时其他节点得不到主节点的响应认为主节点挂掉了，会重新选取主节点。</li>
+<li>内存回收：data节点上的ES进程占用的内存较大，引发JVM的大规模内存回收，造成ES进程失去响应。</li>
+</ul>
+<ol start="3">
+<li><h3 id="防止脑裂的相关配置"><a href="#防止脑裂的相关配置" class="headerlink" title="防止脑裂的相关配置"></a>防止脑裂的相关配置</h3>Elasticsearch中内建的<strong>Zen发现机制</strong></li>
+</ol>
+<ul>
+<li><strong>多播</strong>:也叫组播，指一个节点可以向多台机器发送请求。ES 不建议生产环境使用这种方式，对于一个大规模的集群，组播会产生大量不必要的通信。</li>
+<li><strong>单播</strong>:一个节点加入一个现有集群，或者组建一个新的集群时，发送请求到一台主机。当一个节点联系到单播列表中的成员时，它就会得到整个集群所有节点的状态，然后它会联系 master 节点，并加入集群。</li>
+</ul>
+ <figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">discovery.zen.minimum_master_nodes:</span> <span class="number">2</span></span><br><span class="line"><span class="attr">discovery.zen.ping.multicast.enabled:</span> <span class="literal">false</span></span><br><span class="line"><span class="attr">discovery.zen.ping.unicast.hosts:</span> [<span class="string">&quot;localhost:9300&quot;</span>,<span class="string">&quot;localhost:9301&quot;</span>,<span class="string">&quot;localhost:9302&quot;</span>]</span><br></pre></td></tr></table></figure>
+<p><code>minimum_master_nodes</code>建议配置为<code>(具有master资格的节点的数量/2)+1</code></p>
+]]></content>
+      <tags>
+        <tag>运维</tag>
+        <tag>elasticsearch</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>hexo配置历史</title>
+    <url>//2019/07/14/hexo%E9%85%8D%E7%BD%AE%E5%8E%86%E5%8F%B2/</url>
+    <content><![CDATA[<ol>
+<li><h3 id="主题配置"><a href="#主题配置" class="headerlink" title="主题配置"></a>主题配置</h3><ol>
+<li><code>_config.yml</code>中,配置主题为<code>theme: next</code></li>
+<li>采用Hexo方式配置主题,方便升级主题<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">theme_config:</span></span><br><span class="line"><span class="attr">scheme:</span> <span class="string">Gemini</span></span><br><span class="line"><span class="attr">menu:</span></span><br><span class="line">    <span class="attr">home:</span> <span class="string">/</span> <span class="string">||</span> <span class="string">home</span></span><br><span class="line">    <span class="attr">about:</span> <span class="string">/about/</span> <span class="string">||</span> <span class="string">user</span></span><br><span class="line">    <span class="attr">tags:</span> <span class="string">/tags/</span> <span class="string">||</span> <span class="string">tags</span></span><br><span class="line">    <span class="comment">#categories: /categories/ || th</span></span><br><span class="line">    <span class="attr">archives:</span> <span class="string">/archives/</span> <span class="string">||</span> <span class="string">archive</span></span><br><span class="line">    <span class="comment"># Social Links</span></span><br></pre></td></tr></table></figure>
+<blockquote><p>使用这一方式，你的全部配置都将置于 hexo 主要配置文件中（hexo/_config.yml），并且不需要修改 next/_config.yml，或者创建什么其他的文件。但是所有的主题选项必须放置在 theme_config 后，并全部增加两个空格的缩进。</p>
+</blockquote>
+主题版本 V7.2.0<span id="more"></span></li>
+</ol>
+</li>
+<li><h3 id="开启搜索"><a href="#开启搜索" class="headerlink" title="开启搜索"></a>开启搜索</h3><ol>
+<li>安装<code>npm install hexo-generator-searchdb --save</code></li>
+<li>修改站点配置<code>_config.yml</code><figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">search:</span></span><br><span class="line">  <span class="attr">path:</span> <span class="string">search.xml</span></span><br><span class="line">  <span class="attr">field:</span> <span class="string">post</span></span><br><span class="line">  <span class="attr">format:</span> <span class="string">html</span></span><br><span class="line">  <span class="attr">limit:</span> <span class="number">10000</span></span><br></pre></td></tr></table></figure></li>
+<li>修改主题配置<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">local_search:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure></li>
+</ol>
+</li>
+<li><h3 id="开启侧边栏头像"><a href="#开启侧边栏头像" class="headerlink" title="开启侧边栏头像"></a>开启侧边栏头像</h3></li>
+<li>上传文件到source/uploads文件夹(如果没有该文件夹则手动创建)</li>
+<li>修改主题配置<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">avatar:</span></span><br><span class="line">  <span class="comment"># In theme directory (source/images): /images/avatar.gif</span></span><br><span class="line">  <span class="comment"># In site directory (source/uploads): /uploads/avatar.gif</span></span><br><span class="line">  <span class="comment"># You can also use other linking images.</span></span><br><span class="line">  <span class="attr">url:</span> <span class="string">/uploads/avatar.jpg</span></span><br><span class="line">  <span class="comment"># If true, the avatar would be dispalyed in circle.</span></span><br><span class="line">  <span class="attr">rounded:</span> <span class="literal">true</span></span><br><span class="line">  <span class="comment"># If true, the avatar would be rotated with the cursor.</span></span><br><span class="line">  <span class="attr">rotated:</span> <span class="literal">false</span></span><br></pre></td></tr></table></figure></li>
+<li><h3 id="返回顶部按钮的百分比"><a href="#返回顶部按钮的百分比" class="headerlink" title="返回顶部按钮的百分比"></a>返回顶部按钮的百分比</h3></li>
+<li>scrollpercent设置为<code>true</code><figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">back2top:</span></span><br><span class="line">    <span class="attr">enable:</span> <span class="literal">true</span></span><br><span class="line">    <span class="comment"># Back to top in sidebar.</span></span><br><span class="line">    <span class="attr">sidebar:</span> <span class="literal">false</span></span><br><span class="line">    <span class="comment"># Scroll percent label in b2t button.</span></span><br><span class="line">    <span class="attr">scrollpercent:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure></li>
+<li><h3 id="支持阅读全文"><a href="#支持阅读全文" class="headerlink" title="支持阅读全文"></a>支持阅读全文</h3>当文章过长时，在要截断的地方添加<code>&lt;!--more--&gt;</code>,即可生成”阅读全文”按钮。<br>主题自带的阅读全文，会根据文章字符数固定划分，这样容易导致原文排版出现问题，故不推荐使用</li>
+</ol>
+]]></content>
+      <tags>
+        <tag>hexo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>linux静态路由配置</title>
+    <url>//2019/07/14/linux%E9%9D%99%E6%80%81%E8%B7%AF%E7%94%B1%E9%85%8D%E7%BD%AE/</url>
+    <content><![CDATA[<ol>
+<li>如果要添加一条静态路由，命令为: <br><code>route add -net 192.56.76.0 netmask 255.255.255.0 dev eth0</code></li>
+<li>在<code>/etc/sysconfig/static-routes</code>文件中添加格式为：<br><code>any net 192.56.76.0 netmask 255.255.255.0 dev eth0</code></li>
+<li>删除一条静态路由，命令为: <br><code>route del -net 192.56.76.0 netmask 255.255.255.0 dev eth0</code></li>
+</ol>
+]]></content>
+      <tags>
+        <tag>运维</tag>
+        <tag>linux</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>将数组转换成ArrayList</title>
+    <url>//2019/07/14/%E5%B0%86%E6%95%B0%E7%BB%84%E8%BD%AC%E6%8D%A2%E6%88%90ArrayList/</url>
+    <content><![CDATA[<ol>
+<li><h3 id="使用工具类转换时的坑"><a href="#使用工具类转换时的坑" class="headerlink" title="使用工具类转换时的坑"></a>使用工具类转换时的坑</h3><p>使用工具类<code>Arrays</code>将数组转换成<code>List</code>时,转换后的List不能直接调用<code>add()</code>方法增加元素。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">testArrayToList</span><span class="params">()</span>&#123;</span><br><span class="line">    String[] tests  = &#123;<span class="string">&quot;test1&quot;</span>,<span class="string">&quot;test2&quot;</span>,<span class="string">&quot;test3&quot;</span>&#125;;</span><br><span class="line">    List&lt;String&gt; strings = Arrays.asList(tests);</span><br><span class="line">    strings.add(<span class="string">&quot;1234&quot;</span>);</span><br><span class="line">    System.out.println(JSON.toJSONString(strings));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p> 此处会报错 <code>java.lang.UnsupportedOperationException</code></p>
+</li>
+</ol>
+<span id="more"></span>
+<ol start="2">
+<li><h3 id="原因分析"><a href="#原因分析" class="headerlink" title="原因分析"></a>原因分析</h3><p>工具类<code>Arrays</code>的<code>asList()</code>方法,返回的是其一个内部类ArrayList, 该类没有重写<code>add()</code>方法</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Arrays.asList()方法</span></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Returns a fixed-size list backed by the specified array.  (Changes to</span></span><br><span class="line"><span class="comment"> * the returned list &quot;write through&quot; to the array.)  This method acts</span></span><br><span class="line"><span class="comment"> * as bridge between array-based and collection-based APIs, in</span></span><br><span class="line"><span class="comment"> * combination with &#123;<span class="doctag">@link</span> Collection#toArray&#125;.  The returned list is</span></span><br><span class="line"><span class="comment"> * serializable and implements &#123;<span class="doctag">@link</span> RandomAccess&#125;.</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * &lt;p&gt;This method also provides a convenient way to create a fixed-size</span></span><br><span class="line"><span class="comment"> * list initialized to contain several elements:</span></span><br><span class="line"><span class="comment"> * &lt;pre&gt;</span></span><br><span class="line"><span class="comment"> *     List&amp;lt;String&amp;gt; stooges = Arrays.asList(&quot;Larry&quot;, &quot;Moe&quot;, &quot;Curly&quot;);</span></span><br><span class="line"><span class="comment"> * &lt;/pre&gt;</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> &lt;T&gt; the class of the objects in the array</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> a the array by which the list will be backed</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> a list view of the specified array</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@SafeVarargs</span></span><br><span class="line"><span class="meta">@SuppressWarnings(&quot;varargs&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; List&lt;T&gt; <span class="title function_">asList</span><span class="params">(T... a)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;(a);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p> 返回的内部类</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@serial</span> include</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">ArrayList</span>&lt;E&gt; <span class="keyword">extends</span> <span class="title class_">AbstractList</span>&lt;E&gt;</span><br><span class="line">    <span class="keyword">implements</span> <span class="title class_">RandomAccess</span>, java.io.Serializable</span><br></pre></td></tr></table></figure>
+
+<p> 没有重写的抽象类方法</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * &#123;<span class="doctag">@inheritDoc</span>&#125;</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * &lt;p&gt;This implementation always throws an</span></span><br><span class="line"><span class="comment"> * &#123;<span class="doctag">@code</span> UnsupportedOperationException&#125;.</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@throws</span> UnsupportedOperationException &#123;<span class="doctag">@inheritDoc</span>&#125;</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@throws</span> ClassCastException            &#123;<span class="doctag">@inheritDoc</span>&#125;</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@throws</span> NullPointerException          &#123;<span class="doctag">@inheritDoc</span>&#125;</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@throws</span> IllegalArgumentException      &#123;<span class="doctag">@inheritDoc</span>&#125;</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@throws</span> IndexOutOfBoundsException     &#123;<span class="doctag">@inheritDoc</span>&#125;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">add</span><span class="params">(<span class="type">int</span> index, E element)</span> &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">UnsupportedOperationException</span>();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * &#123;<span class="doctag">@inheritDoc</span>&#125;</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * &lt;p&gt;This implementation always throws an</span></span><br><span class="line"><span class="comment"> * &#123;<span class="doctag">@code</span> UnsupportedOperationException&#125;.</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@throws</span> UnsupportedOperationException &#123;<span class="doctag">@inheritDoc</span>&#125;</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@throws</span> IndexOutOfBoundsException     &#123;<span class="doctag">@inheritDoc</span>&#125;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> E <span class="title function_">remove</span><span class="params">(<span class="type">int</span> index)</span> &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">UnsupportedOperationException</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><h3 id="参考《阿里巴巴JAVA编程规范》"><a href="#参考《阿里巴巴JAVA编程规范》" class="headerlink" title="参考《阿里巴巴JAVA编程规范》"></a>参考《阿里巴巴JAVA编程规范》</h3><blockquote><ol start="5">
+<li>【强制】使用工具类 Arrays.asList()把数组转换成集合时，不能使用其修改集合相关的方 法，它的 add/remove/clear 方法会抛出 UnsupportedOperationException 异常。 说明:asList 的返回对象是一个 Arrays 内部类，并没有实现集合的修改方法。Arrays.asList 体现的是适配器模式，只是转换接口，后台的数据仍是数组。<pre><code>String[] str = new String[] { &quot;you&quot;, &quot;wu&quot; };
+</code></pre>
+List list = Arrays.asList(str); 第一种情况:list.add(“yangguanbao”); 运行时异常。 第二种情况:str[0] = “gujin”; 那么list.get(0)也会随之修改。</li>
+</ol>
+</blockquote></li>
+<li><h3 id="解决的办法"><a href="#解决的办法" class="headerlink" title="解决的办法"></a>解决的办法</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="type">List</span> <span class="variable">list</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;(Arrays.asList(<span class="string">&quot;a&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="string">&quot;c&quot;</span>))</span><br></pre></td></tr></table></figure></li>
+</ol>
+]]></content>
+      <tags>
+        <tag>Java</tag>
+        <tag>编程规范</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>更优雅的关闭资源try-with-resources</title>
+    <url>//2019/09/12/%E6%9B%B4%E4%BC%98%E9%9B%85%E7%9A%84%E5%85%B3%E9%97%AD%E8%B5%84%E6%BA%90try-with-resources/</url>
+    <content><![CDATA[<p><code>try-with-resources</code>是 JDK 7 中一个新的异常处理机制，它能够很容易地关闭在<code>try-catch</code>语句块中使用的资源。所谓的资源(resource)是指在程序完成后，必须关闭的对象。<code>try-with-resources</code>语句确保了每个资源在语句结束时关闭。所有实现了<code>java.lang.AutoCloseable</code>接口的对象(其中，它包括实现了<code>java.io.Closeable</code> 的所有对象),可以使用作为资源。</p>
+<p>在没有使用<code>try-with-resources</code>语法糖时:</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> String <span class="title function_">test</span><span class="params">(String path)</span> &#123;</span><br><span class="line">    <span class="type">BufferedReader</span> <span class="variable">br</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        br = <span class="keyword">new</span> <span class="title class_">BufferedReader</span>(<span class="keyword">new</span> <span class="title class_">FileReader</span>(path));</span><br><span class="line">        <span class="keyword">return</span> br.readLine();</span><br><span class="line">    &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">        e.printStackTrace();</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (<span class="literal">null</span> != br) &#123;</span><br><span class="line">                br.close();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>使用后:</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> String <span class="title function_">test2</span><span class="params">(String path)</span> &#123;</span><br><span class="line">    <span class="keyword">try</span> (<span class="type">BufferedReader</span> <span class="variable">br</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BufferedReader</span>(<span class="keyword">new</span> <span class="title class_">FileReader</span>(path));) &#123;</span><br><span class="line">        <span class="keyword">return</span> br.readLine();</span><br><span class="line">    &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">        e.printStackTrace();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>反编译发现: </p>
+<ul>
+<li>try 块没有发生异常时，自动调用 close 方法，如果发生异常，catch 块捕捉并处理异常。</li>
+<li>try 块发生异常，然后自动调用 close 方法，如果 close 也发生异常，catch 块只会捕捉 try 块抛出的异常，close 方法的异常会在catch 中被压制，但是你可以在catch块中，用 Throwable.getSuppressed 方法来获取到压制异常的数组。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> String <span class="title function_">test</span><span class="params">(String path)</span> &#123;</span><br><span class="line">    <span class="type">BufferedReader</span> <span class="variable">br</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        br = <span class="keyword">new</span> <span class="title class_">BufferedReader</span>(<span class="keyword">new</span> <span class="title class_">FileReader</span>(path));</span><br><span class="line">        <span class="type">String</span> <span class="variable">var3</span> <span class="operator">=</span> br.readLine();</span><br><span class="line">        <span class="keyword">return</span> var3;</span><br><span class="line">    &#125; <span class="keyword">catch</span> (IOException var13) &#123;</span><br><span class="line">        var13.printStackTrace();</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (<span class="literal">null</span> != br) &#123;</span><br><span class="line">                br.close();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException var12) &#123;</span><br><span class="line">            var12.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> String <span class="title function_">test2</span><span class="params">(String path)</span> &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="type">BufferedReader</span> <span class="variable">br</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BufferedReader</span>(<span class="keyword">new</span> <span class="title class_">FileReader</span>(path));</span><br><span class="line">        <span class="type">Throwable</span> <span class="variable">var3</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line"></span><br><span class="line">        String var4;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            var4 = br.readLine();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Throwable var14) &#123;</span><br><span class="line">            var3 = var14;</span><br><span class="line">            <span class="keyword">throw</span> var14;</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (br != <span class="literal">null</span>) &#123;</span><br><span class="line">                <span class="keyword">if</span> (var3 != <span class="literal">null</span>) &#123;</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        br.close();</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (Throwable var13) &#123;</span><br><span class="line">                        var3.addSuppressed(var13);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    br.close();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> var4;</span><br><span class="line">    &#125; <span class="keyword">catch</span> (IOException var16) &#123;</span><br><span class="line">        var16.printStackTrace();</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在处理必须关闭的资源时，使用<code>try-with-resources</code>语句替代<code>try-finally</code>语句。 生成的代码更简洁，更清晰，并且生成的异常更有用。 <code>try-with-resources</code>语句在编写必须关闭资源的代码时会更容易，也不会出错，而使用<code>try-finally</code>语句实际上是不可能的。</p>
+<p>参考: <a href="https://blog.csdn.net/weixin_40255793/article/details/80812961">https://blog.csdn.net/weixin_40255793/article/details/80812961</a></p>
+]]></content>
+      <tags>
+        <tag>Java</tag>
+        <tag>编程规范</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>设计模式之装饰者模式</title>
+    <url>//2020/02/25/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E8%A3%85%E9%A5%B0%E8%80%85%E6%A8%A1%E5%BC%8F/</url>
+    <content><![CDATA[<p><strong>装饰者模式</strong>动态地将责任附加到对象上。若要扩展功能，装饰者提供了比继承更有弹性的替代方案。</p>
+<ol>
+<li><h4 id="本模式需要解决的问题"><a href="#本模式需要解决的问题" class="headerlink" title="本模式需要解决的问题"></a>本模式需要解决的问题</h4></li>
+</ol>
+<p>咖啡店有各种饮品，每个饮品都有它的描述和价格，同时，还有各种调料可以组合到已有的饮品中。</p>
+<img src="/.cn//02/25/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E8%A3%85%E9%A5%B0%E8%80%85%E6%A8%A1%E5%BC%8F/%E9%9C%80%E6%B1%82%E6%8F%8F%E8%BF%B0.png" class title="需求描述">
+<span id="more"></span>
+
+<ol start="2">
+<li><h4 id="未应用设计模式前"><a href="#未应用设计模式前" class="headerlink" title="未应用设计模式前"></a>未应用设计模式前</h4></li>
+</ol>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 原场景下</span></span><br><span class="line"><span class="comment"> * 咖啡店的饮料类</span></span><br><span class="line"><span class="comment"> * 每种饮料都会创建一个类，每个cost()方法计算出咖啡和订单上各种调料的价钱,形成&quot;类爆炸&quot;</span></span><br><span class="line"><span class="comment"> * 如果在Beverage基类中加入新功能，并不适用于所有的子类</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">DecoratorPatternWithout</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">Beverage</span> <span class="variable">beverage</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HouseBlend</span>();</span><br><span class="line">        System.out.println(<span class="string">&quot;HouseBlend cost :&quot;</span> + beverage.cost());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">abstract</span> <span class="keyword">class</span> <span class="title class_">Beverage</span> &#123;</span><br><span class="line">    <span class="type">String</span> <span class="variable">description</span> <span class="operator">=</span> <span class="string">&quot;unknown beverage&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">getDescription</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> description;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">abstract</span> <span class="type">float</span> <span class="title function_">cost</span><span class="params">()</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">HouseBlend</span> <span class="keyword">extends</span> <span class="title class_">Beverage</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="type">String</span> <span class="variable">milkPrice</span> <span class="operator">=</span> <span class="string">&quot;$2&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">float</span> <span class="title function_">cost</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(HouseBlend.class.toGenericString() + <span class="string">&quot; costs $10 &quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">10.0f</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">DarkBlend</span> <span class="keyword">extends</span> <span class="title class_">Beverage</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">float</span> <span class="title function_">cost</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(DarkBlend.class.toGenericString() + <span class="string">&quot; costs $11&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">11.0f</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Decaf</span> <span class="keyword">extends</span> <span class="title class_">Beverage</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">float</span> <span class="title function_">cost</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(Decaf.class.toGenericString() + <span class="string">&quot; costs $12&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">12.0f</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>缺点：</strong></p>
+<ul>
+<li>每种饮料都会创建一个类，每个cost()方法计算出咖啡和订单上各种调料的价钱,形成”类爆炸”</li>
+<li>如果在Beverage基类中加入新功能，并不适用于所有的子类</li>
+</ul>
+<ol start="3">
+<li><h4 id="应用装饰者模式后"><a href="#应用装饰者模式后" class="headerlink" title="应用装饰者模式后"></a>应用装饰者模式后</h4><blockquote>
+<p>具体的处理方案是</p>
+</blockquote>
+<ol>
+<li>拿一个DarkRoast对象</li>
+<li>以Mocha对象装饰它</li>
+<li>以Whip对象装饰它</li>
+<li>调用cost()方法，并依赖委托(delegate)将调料的价格加上去</li>
+</ol>
+</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 装饰者模式：动态的将责任附加到对象上。</span></span><br><span class="line"><span class="comment"> * 若要扩展功能，装饰者提供了比继承更有弹性的替代方案</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">DecoratorPattern</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">Beverage</span> <span class="variable">beverage</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">DarkRoast</span>();</span><br><span class="line">        beverage = <span class="keyword">new</span> <span class="title class_">Mocha</span>(beverage);</span><br><span class="line">        beverage = <span class="keyword">new</span> <span class="title class_">Whip</span>(beverage);</span><br><span class="line">        System.out.println(<span class="string">&quot;total description:&quot;</span> + beverage.getDescription());</span><br><span class="line">        System.out.println(<span class="string">&quot;total cost:&quot;</span> + beverage.cost());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">DarkRoast</span> <span class="keyword">extends</span> <span class="title class_">Beverage</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">DarkRoast</span><span class="params">()</span>&#123;</span><br><span class="line">        description = <span class="string">&quot;darkRoast&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">float</span> <span class="title function_">cost</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(DarkRoast.class.toGenericString() + <span class="string">&quot; cost $5&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">5</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">abstract</span> <span class="keyword">class</span> <span class="title class_">CondimentDecorator</span> <span class="keyword">extends</span> <span class="title class_">Beverage</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">abstract</span> String <span class="title function_">getDescription</span><span class="params">()</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">float</span> <span class="title function_">cost</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Mocha</span> <span class="keyword">extends</span> <span class="title class_">CondimentDecorator</span> &#123;</span><br><span class="line"></span><br><span class="line">    Beverage beverage;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">Mocha</span><span class="params">(Beverage beverage)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.beverage = beverage;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">getDescription</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;mocha decorator,&quot;</span> + beverage.getDescription();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">float</span> <span class="title function_">cost</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(Mocha.class.toGenericString() + <span class="string">&quot; cost $6 extra&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">6</span> + beverage.cost();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Whip</span> <span class="keyword">extends</span> <span class="title class_">CondimentDecorator</span> &#123;</span><br><span class="line">    Beverage beverage;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">Whip</span><span class="params">(Beverage beverage)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.beverage = beverage;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">getDescription</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;whip decorator,&quot;</span> + beverage.getDescription();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">float</span> <span class="title function_">cost</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(Whip.class.toGenericString() + <span class="string">&quot; cost $7 extra&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">7</span> + beverage.cost();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>优点:</strong></p>
+<ul>
+<li>修改调料制作一种新饮料时，只要装配一个新的组合就可以了</li>
+</ul>
+]]></content>
+      <tags>
+        <tag>Java</tag>
+        <tag>设计模式</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>设计模式之观察者模式</title>
+    <url>//2020/02/24/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F/</url>
+    <content><![CDATA[<p><strong>观察者模式</strong>定义了对象之间的一对多依赖，这样一来，当一个对象改变状态时，它的所有依赖者都会收到通知并自动更新。</p>
+<ol>
+<li><h4 id="本模式需要解决的问题"><a href="#本模式需要解决的问题" class="headerlink" title="本模式需要解决的问题"></a>本模式需要解决的问题</h4>建立一个气象观测站，根据气象信息(温度、湿度、气压)的变化，设计多个<strong>气象布告板</strong></li>
+</ol>
+<img src="/.cn//02/24/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F/%E9%9C%80%E6%B1%82%E6%8F%8F%E8%BF%B0.png" class title="需求描述">
+<span id="more"></span>
+
+<ol start="2">
+<li><h4 id="未应用设计模式前"><a href="#未应用设计模式前" class="headerlink" title="未应用设计模式前"></a>未应用设计模式前</h4></li>
+</ol>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">interface</span> <span class="title class_">Display</span> &#123;</span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">update</span><span class="params">(<span class="type">float</span> temp, <span class="type">float</span> humidity, <span class="type">float</span> pressure)</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">DisPlay1</span> <span class="keyword">implements</span> <span class="title class_">Display</span> &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">update</span><span class="params">(<span class="type">float</span> temp, <span class="type">float</span> humidity, <span class="type">float</span> pressure)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;display1:&quot;</span> + temp + humidity + pressure);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">DisPlay2</span> <span class="keyword">implements</span> <span class="title class_">Display</span> &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">update</span><span class="params">(<span class="type">float</span> temp, <span class="type">float</span> humidity, <span class="type">float</span> pressure)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;display2:&quot;</span> + temp + humidity + pressure);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">weatherData</span> &#123;</span><br><span class="line">    <span class="type">float</span> temp;</span><br><span class="line">    <span class="type">float</span> humidity;</span><br><span class="line">    <span class="type">float</span> pressure;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onChange</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">DisPlay1</span>().update(temp, humidity, pressure);</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">DisPlay2</span>().update(temp, humidity, pressure);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>缺点：</strong></p>
+<ul>
+<li>针对具体实现编程，回导致以后在增加或删除布告板<code>Display</code>时需要修改<code>WeatherData</code></li>
+</ul>
+<ol start="3">
+<li><h4 id="应用观察者模式后"><a href="#应用观察者模式后" class="headerlink" title="应用观察者模式后"></a>应用观察者模式后</h4></li>
+</ol>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 所有观察者都必须实现</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">interface</span> <span class="title class_">ObserverV1</span> &#123;</span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">update</span><span class="params">(String temperature, String humidity, String pressure)</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">DefaultObserver</span> <span class="keyword">implements</span> <span class="title class_">ObserverV1</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">update</span><span class="params">(String temperature, String humidity, String pressure)</span> &#123;</span><br><span class="line">        System.out.println(DefaultObserver.class.toGenericString() + <span class="string">&quot;:&quot;</span> + temperature + <span class="string">&quot;   &quot;</span> + humidity + <span class="string">&quot;   &quot;</span> + pressure);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">SecondObserver</span> <span class="keyword">implements</span> <span class="title class_">ObserverV1</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">update</span><span class="params">(String temperature, String humidity, String pressure)</span> &#123;</span><br><span class="line">        System.out.println(SecondObserver.class.toGenericString()+<span class="string">&quot;:气温是:&quot;</span> + temperature + <span class="string">&quot;, 气压是:&quot;</span> + pressure);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 主题</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">interface</span> <span class="title class_">Subject</span> &#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 注册观察者</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">registerObserver</span><span class="params">(ObserverV1 observer)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 取消注册观察者</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">removeObserver</span><span class="params">(ObserverV1 observer)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 通知观察者</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">notifyObservers</span><span class="params">()</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 天气数据</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">WeatherDataV1</span> <span class="keyword">implements</span> <span class="title class_">Subject</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> Set&lt;ObserverV1&gt; observers = <span class="keyword">new</span> <span class="title class_">HashSet</span>&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">registerObserver</span><span class="params">(ObserverV1 observer)</span> &#123;</span><br><span class="line">        observers.add(observer);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">removeObserver</span><span class="params">(ObserverV1 observer)</span> &#123;</span><br><span class="line">        observers.remove(observer);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">notifyObservers</span><span class="params">()</span> &#123;</span><br><span class="line">        observers.forEach(observer -&gt; observer.update(temperature, humidity, pressure));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String temperature;</span><br><span class="line">    <span class="keyword">private</span> String humidity;</span><br><span class="line">    <span class="keyword">private</span> String pressure;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setTemperature</span><span class="params">(String temperature)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.temperature = temperature;</span><br><span class="line">        onKeyChanged();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setHumidity</span><span class="params">(String humidity)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.humidity = humidity;</span><br><span class="line">        onKeyChanged();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setPressure</span><span class="params">(String pressure)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.pressure = pressure;</span><br><span class="line">        onKeyChanged();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onKeyChanged</span><span class="params">()</span> &#123;</span><br><span class="line">        notifyObservers();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>优点：</strong></p>
+<ul>
+<li>增加/删除Display时,不再需要修改WeatherData;</li>
+<li>将彼岸花对部分与固定不变的部分分离</li>
+</ul>
+<p>调用时：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">    <span class="type">WeatherDataV1</span> <span class="variable">weatherData</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">WeatherDataV1</span>();</span><br><span class="line">    <span class="type">DefaultObserver</span> <span class="variable">defaultObserver</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">DefaultObserver</span>();</span><br><span class="line">    <span class="type">SecondObserver</span> <span class="variable">secondObserver</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">SecondObserver</span>();</span><br><span class="line">    weatherData.registerObserver(defaultObserver);</span><br><span class="line">    weatherData.registerObserver(secondObserver);</span><br><span class="line">    weatherData.setTemperature(<span class="string">&quot;hahaha&quot;</span>);</span><br><span class="line">    weatherData.setPressure(<span class="string">&quot;heiheihei&quot;</span>);</span><br><span class="line">    weatherData.removeObserver(defaultObserver);</span><br><span class="line">    weatherData.setHumidity(<span class="string">&quot;h1111&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
+      <tags>
+        <tag>Java</tag>
+        <tag>设计模式</tag>
+      </tags>
+  </entry>
+</search>
